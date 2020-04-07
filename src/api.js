@@ -51,8 +51,9 @@ const routes = {
     response.end()
   },
 
-  'GET /replicate': async ({ response, node }) => {
-    const body = await node.createReplicateRequest()
+  'GET /replicate': async ({ response, node, params }) => {
+    const key = params.get('key')
+    const body = await node.createReplicateRequest({ storageKey: key || null })
     response.setHeader('content-type', 'application/json')
     response.write(JSON.stringify(body))
     response.end()

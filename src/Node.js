@@ -15,7 +15,7 @@ class Node {
     }
 
     this.type = type
-    this.started = moment()
+    this.started = moment().toString()
     this.nodeList = new Set(nodeList)
     this.storage = new Storage(storageDriver)
     this.publicAddress = publicAddress
@@ -28,55 +28,59 @@ class Node {
   async getInfo() {
     return {
       publicAddress: this.publicAddress,
-      started: this.started.toString(),
+      started: this.started,
       version,
       type: this.type
     }
   }
 
   async getData(storageKey) {
-    return await this.storage.getItem(storageKey)
+    let existing = await this.storage.getItem(storageKey)
+    if (!existing.createdAt) {
+      await this.requestUpdates({ storageKey })
+      existing = await this.storage.getItem(storageKey)
+    }
+    return existing
   }
 
   async removeData(storageKey) {
+    await this.storage.removeItem(storageKey)
     this.updateNodes()
-    return await this.storage.removeItem(storageKey)
   }
 
   async setData(key, value) {
+    const response = await this.storage.setItem(key, value, true)
     this.updateNodes()
-    return await this.storage.setItem(key, value, true)
+    return response
   }
 
   async updateData(storageKey, value) {
+    const response = await this.storage.setItem(storageKey, value, false)
     this.updateNodes()
-    return await this.storage.setItem(storageKey, value, false)
+    return response
   }
 
-  async createReplicateRequest() {
-    const data = await this.storage.getAllData()
+  async createReplicateRequest({ storageKey } = {}) {
+    const data = await (storageKey ? this.storage.getItem(storageKey) : this.storage.getAllData())
     return {
       lastUpdate: this.lastUpdate,
-      data
+      data: !Array.isArray(data) ? [ data ] : data
     }
   }
 
-  makeNodeRequest({ request, body, ip }) {
+  makeNodeRequest({ request, body, ip, query }) {
     const url = new URL(ip)
     const reqFn = url.protocol.startsWith('https') ? httpsRequest : httpRequest
 
     let opts
-    if (request.type === 'getReplicate') {
+    if (request === 'getReplicate') {
       opts = {
         host: url.hostname,
         port: url.port,
         path: '/replicate',
-        method: 'GET',
-        headers: {
-          'content-type': 'application/json'
-        }
+        method: 'GET'
       }
-    } else if (request.type === 'sendReplicate') {
+    } else if (request === 'sendReplicate') {
       opts = {
         host: url.hostname,
         port: url.port,
@@ -86,6 +90,10 @@ class Node {
           'content-type': 'application/json'
         }
       }
+    }
+
+    if (query) {
+      opts.path = `${ opts.path }?${ query }`
     }
 
     if (!this.hidden) {
@@ -110,7 +118,7 @@ class Node {
     })
   }
 
-  async requestUpdates() {
+  async requestUpdates({ storageKey } = {}) {
     try {
       for (const ip of this.nodeList) {
         if (ip === this.publicAddress) {
@@ -118,7 +126,8 @@ class Node {
         }
         const body = await this.makeNodeRequest({
           request: 'getReplicate',
-          ip
+          ip,
+          query: `key=${ storageKey }`
         })
         await this.receiveUpdate(body)
       }
@@ -137,9 +146,6 @@ class Node {
         if (ip === this.publicAddress) {
           continue
         }
-        const url = new URL(ip)
-        const reqFn = url.protocol.startsWith('https') ? httpRequest : httpRequest
-
         replicatePromises.push(this.makeNodeRequest({
           request: 'sendReplicate',
           ip,
