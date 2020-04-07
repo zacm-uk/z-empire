@@ -1,0 +1,10 @@
+{
+  "type": "STORAGE",
+  "storageDriver": "memory",
+  "port": 3001,
+  "nodeList": [
+    "http://blah.blah.blah.blah"
+  ],
+  "publicAddress": "http://blah.blah.blah.blah",
+  "hidden": false
+}
