@@ -28,8 +28,6 @@ for (const arg of (configArray || process.argv)) {
 }
 const node = new Node(opts)
 
-if (node.type === Node.TYPES.CLIENT) {
-  module.exports = {
-    node
-  }
+module.exports = {
+  node
 }
