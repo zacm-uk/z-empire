@@ -1,5 +1,5 @@
 {
-  "name": "z-empire",
+  "name": "@zacm-uk/z-empire",
   "version": "1.0.0",
   "description": "",
   "main": "src/main.js",
@@ -8,9 +8,12 @@
     "start": "node src/main.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Zac McChesney",
+  "license": "MIT",
   "dependencies": {
-    "moment": "^2.24.0"
+    "moment": "2.24.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }
