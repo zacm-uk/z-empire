@@ -160,6 +160,7 @@ class Node {
   }
 
   async receiveUpdate({ data }) {
+    data = data.filter(({ createdAt }) => !!createdAt)
     await this.storage.updateInternalBatch(data)
   }
 
