@@ -22,7 +22,7 @@ class Node {
     this.hidden = hidden
 
     type === Node.TYPES.STORAGE && this.requestUpdates()
-    startApi(this, port)
+    type === Node.TYPES.STORAGE && startApi(this, port)
   }
 
   async getInfo() {
@@ -96,7 +96,7 @@ class Node {
       opts.path = `${ opts.path }?${ query }`
     }
 
-    if (!this.hidden) {
+    if (!this.hidden && this.type !== Node.TYPES.CLIENT) {
       opts.headers['node-path'] = this.publicAddress
     }
 
