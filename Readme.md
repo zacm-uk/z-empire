@@ -1,5 +1,4 @@
 # Z Empire
-
 ## What is it?
 Z Empire is a decentralised data storage and replication system.
 
@@ -24,6 +23,13 @@ One use case I can see for this is to create a web of node's across multiple net
 - When data is modified, the node tells every node it knows about to update that data, ensuring redundancy.
 
 - Data is stored as key/value pairs, however the key is hashed with a random salt to ensure that only people who know the hash can access the data. This also avoids someone accidentally overwriting data.
+
+## Important security note
+Z-Empire does not encrypt your data. To ensure correct data security, please encrypt data before storing it in a node, and avoid storing encryption information with the data.
+
+Z-Empire allows nodes to use HTTP and the server created by a node is an HTTP server. This is designed to allow easy development and testing, however if using this in production PLEASE use a reverse proxy such as NGINX and disable HTTP.
+
+If you do not want to create a reverse proxy, use a service such as Azure that allows forcing HTTPS.
 
 ## How do I configure it?
 Configuration can be done using either a JSON file, an environment variable, or command line arguments.
@@ -104,3 +110,40 @@ This only applies to storage nodes as client nodes do not start a server.
 
 #### hidden
 ```hidden``` is a true/false value that decides if this node will broadcast itself to other nodes.
+
+## Usage
+### Storage node
+To start a storage node you can do the following to start the node:
+
+```bash
+node src/main.js config=config.json
+node src/main.js type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true
+EMPIRE_CONFIG="type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true" node src/main.js
+
+npm start -- config.json
+npm start -- type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true
+EMPIRE_CONFIG="type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true" npm start
+```
+
+### Client node
+While it is possible to start a client node in the same way as a storage node, it will not be usable because a client node does not start a server.
+
+A client node is intended to be used inside a JavaScript project.
+
+For an example, see [z-web](https://github.com/zacm-uk/z-web) which uses Z-Empire to publish and browse websites without a physical server.
+
+```javascript
+process.env.EMPIRE_CONFIG = 'type=CLIENT storageDriver=memory nodeList=https://empire.zacm.uk hidden=true'
+
+// Starts the node using the env for config
+const { node } = require('@zacm-uk/z-empire')
+
+const { storageKey } = await node.setData(key, value)
+// Store storageKey somewhere
+
+const { value } = await node.getDate(storageKey)
+
+await node.updateData(storageKey, newValue)
+
+await node.removeData(storageKey)
+```
