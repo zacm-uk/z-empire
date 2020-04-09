@@ -13,7 +13,8 @@ class SqlStorage {
       database: db,
       ssl,
       host,
-      port
+      port,
+      dialectOptions: { ssl }
     })
 
     this.model = class Storage extends Model {
