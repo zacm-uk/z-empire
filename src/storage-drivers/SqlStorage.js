@@ -5,13 +5,15 @@ const { randomBytes, createHash } = require('crypto')
 const { Sequelize, Model, TEXT, DATE } = require('sequelize')
 
 class SqlStorage {
-  constructor({ dialect, username, password, db, ssl }) {
+  constructor({ dialect, username, password, db, ssl, host, port }) {
     this.sequelize = new Sequelize(dialect === 'sqlite' ? { dialect, storage: join(homedir(), '.z-empire.db') } : {
       dialect,
       username,
       password,
       database: db,
-      ssl
+      ssl,
+      host,
+      port
     })
 
     this.model = class Storage extends Model {

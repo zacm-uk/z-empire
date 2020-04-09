@@ -166,8 +166,7 @@ class Node {
 
   static TYPES = {
     STORAGE: 'STORAGE',
-    CLIENT: 'CLIENT',
-    ROUTER: 'ROUTER'
+    CLIENT: 'CLIENT'
   }
 }
 
