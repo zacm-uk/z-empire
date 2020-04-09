@@ -120,7 +120,7 @@ node src/main.js config=config.json
 node src/main.js type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true
 EMPIRE_CONFIG="type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true" node src/main.js
 
-npm start -- config.json
+npm start -- config=config.json
 npm start -- type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true
 EMPIRE_CONFIG="type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true" npm start
 ```
