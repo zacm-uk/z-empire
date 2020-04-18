@@ -116,9 +116,9 @@ This only applies to storage nodes as client nodes do not start a server.
 To start a storage node you can do the following to start the node:
 
 ```bash
-node src/main.js config=config.json
-node src/main.js type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true
-EMPIRE_CONFIG="type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true" node src/main.js
+node build/main.js config=config.json
+node build/main.js type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true
+EMPIRE_CONFIG="type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true" node build/main.js
 
 npm start -- config=config.json
 npm start -- type=STORAGE storageDriver=memory port=3001 nodeList=https://empire.zacm.uk publicAddress=http://blah.blah.blah.blah hidden=true

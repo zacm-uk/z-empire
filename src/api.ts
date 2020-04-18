@@ -1,6 +1,18 @@
-const { createServer } = require('http')
+import { createServer, ServerResponse } from 'http'
+import { URLSearchParams } from 'url'
 
-const routes = {
+import { Node } from './Node'
+
+type RouteOpts = {
+  response: ServerResponse
+  node: Node
+  body: any
+  params: URLSearchParams
+}
+
+type Route = (opts: RouteOpts) => (Promise<void> | void)
+
+const routes: { [key: string]: Route } = {
   'GET /node/info': async ({ response, node }) => {
     response.setHeader('content-type', 'application/json')
     response.write(JSON.stringify(await node.getInfo()))
@@ -60,13 +72,13 @@ const routes = {
   }
 }
 
-const startApi = (node, port) => createServer((request, response) => {
-  const [ path ] = request.url.split('?')
-  const params = new URLSearchParams(request.url.replace(path, ''))
+export const startApi = (node: Node, port: number) => createServer((request, response) => {
+  const [ path ] = request.url?.split('?') ?? []
+  const params = new URLSearchParams(request.url?.replace(path, ''))
   const route = routes[`${ request.method } ${ path }`]
 
   if (request.headers['node-path']) {
-    const nodeIps = request.headers['node-path'].split(',')
+    const nodeIps = (request.headers['node-path'] as string).split(',')
     for (const ip of nodeIps) {
       node.nodeList.add(ip)
     }
@@ -91,7 +103,7 @@ const startApi = (node, port) => createServer((request, response) => {
           data = JSON.parse(data)
         }
       })
-      .then(() => route({ request, response, path, params, node, body: data }))
+      .then(() => route({ response, params, node, body: data }))
       .catch(error => {
         response.statusCode = 500
         response.setHeader('content-type', 'application/json')
@@ -100,7 +112,3 @@ const startApi = (node, port) => createServer((request, response) => {
       })
   })
 }).listen(process.env.PORT || port)
-
-module.exports = {
-  startApi
-}

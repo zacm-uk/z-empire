@@ -1,12 +1,14 @@
-const {MemoryStorage, SqlStorage} = require('./storage-drivers')
+import { MemoryStorage, SqlStorage } from './storage-drivers'
 
-function Storage(driver) {
+export type StorageDriverType = 'memory' | 'sql'
+
+export function Storage(driver: StorageDriverType) {
   if (driver === 'memory') {
     return new MemoryStorage()
   }
   if (driver === 'sql') {
     return new SqlStorage({
-      dialect: process.env.STORAGE_DIALECT,
+      dialect: process.env.STORAGE_DIALECT as string,
       username: process.env.STORAGE_USERNAME,
       password: process.env.STORAGE_PASSWORD,
       db: process.env.STORAGE_DB,
@@ -16,8 +18,4 @@ function Storage(driver) {
     })
   }
   throw new Error('Invalid storage driver')
-}
-
-module.exports = {
-  Storage
 }

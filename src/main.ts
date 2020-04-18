@@ -1,13 +1,13 @@
-const { resolve } = require('path')
+import { resolve } from 'path'
 
-const { Node } = require('./Node')
+import { NodeOpts, Node } from './Node'
 
-let opts = {}
+let opts: any = {}
 
 const configArray = process.env.EMPIRE_CONFIG && process.env.EMPIRE_CONFIG.split(' ')
 
 for (const arg of (configArray || process.argv)) {
-  let [ key, value ] = arg.split('=')
+  let [ key, value ] = arg.split('=') as any[]
   if (!key || !value) {
     continue
   }
@@ -26,8 +26,4 @@ for (const arg of (configArray || process.argv)) {
   }
   opts[key] = value
 }
-const node = new Node(opts)
-
-module.exports = {
-  node
-}
+export const node = new Node(opts as NodeOpts)

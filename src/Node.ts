@@ -1,15 +1,41 @@
-const { request: httpsRequest } = require('https')
-const { request: httpRequest } = require('http')
+import { IncomingMessage, request as httpRequest } from 'http'
+import { request as httpsRequest } from 'https'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { URL } from 'url'
 
-const { utc: moment } = require('moment')
+import { utc as moment } from 'moment'
 
-const { startApi } = require('./api')
-const { Storage } = require('./Storage')
+import { startApi } from './api'
+import { StorageDriverType, Storage } from './Storage'
+import { IStorage } from './storage-drivers'
 
-const { version } = require('../package.json')
+const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'))
 
-class Node {
-  constructor({ type, storageDriver, port, nodeList = [], publicAddress, hidden = false }) {
+export enum NodeType {
+  STORAGE = 'STORAGE',
+  CLIENT = 'CLIENT'
+}
+
+export type NodeOpts = {
+  type: NodeType
+  storageDriver: StorageDriverType
+  port?: number
+  nodeList?: string[]
+  publicAddress?: string
+  hidden?: boolean
+}
+
+export class Node {
+  public readonly type: NodeType
+  public readonly started: string
+  public nodeList: Set<string>
+  public storage: IStorage
+  public publicAddress: string
+  public hidden: boolean
+  public lastUpdate: string = moment().toString()
+
+  constructor({ type, storageDriver, port, nodeList = [], publicAddress, hidden = false }: NodeOpts) {
     if (!Node.TYPES[type]) {
       throw new Error('Invalid node type')
     }
@@ -17,12 +43,12 @@ class Node {
     this.type = type
     this.started = moment().toString()
     this.nodeList = new Set(nodeList)
-    this.storage = new Storage(storageDriver)
-    this.publicAddress = publicAddress
+    this.storage = new (Storage as any)(storageDriver)
+    this.publicAddress = publicAddress || ''
     this.hidden = hidden
 
     type === Node.TYPES.STORAGE && this.requestUpdates()
-    type === Node.TYPES.STORAGE && startApi(this, port)
+    type === Node.TYPES.STORAGE && port && startApi(this, port)
   }
 
   async getInfo() {
@@ -34,7 +60,7 @@ class Node {
     }
   }
 
-  async getData(storageKey) {
+  async getData(storageKey: string) {
     let existing = await this.storage.getItem(storageKey)
     if (!existing.createdAt) {
       await this.requestUpdates({ storageKey })
@@ -43,24 +69,24 @@ class Node {
     return existing
   }
 
-  async removeData(storageKey) {
+  async removeData(storageKey: string) {
     await this.storage.removeItem(storageKey)
     this.updateNodes()
   }
 
-  async setData(key, value) {
+  async setData(key: string, value: string) {
     const response = await this.storage.setItem(key, value, true)
     this.updateNodes()
     return response
   }
 
-  async updateData(storageKey, value) {
+  async updateData(storageKey: string, value: string) {
     const response = await this.storage.setItem(storageKey, value, false)
     this.updateNodes()
     return response
   }
 
-  async createReplicateRequest({ storageKey } = {}) {
+  async createReplicateRequest({ storageKey }: { storageKey?: string | null } = {}) {
     const data = await (storageKey ? this.storage.getItem(storageKey) : this.storage.getAllData())
     return {
       lastUpdate: this.lastUpdate,
@@ -68,11 +94,11 @@ class Node {
     }
   }
 
-  makeNodeRequest({ request, body, ip, query }) {
+  makeNodeRequest({ request, body, ip, query }: { request: string, body?: string, ip: string, query?: string }) {
     const url = new URL(ip)
     const reqFn = url.protocol.startsWith('https') ? httpsRequest : httpRequest
 
-    let opts
+    let opts: any
     if (request === 'getReplicate') {
       opts = {
         host: url.hostname,
@@ -101,7 +127,7 @@ class Node {
     }
 
     return new Promise((resolve, reject) => {
-      const request = reqFn(opts, response => {
+      const request = reqFn(opts, (response: IncomingMessage) => {
         let data = ''
         response.on('data', chunk => data += chunk)
         response.on('end', () => {
@@ -118,7 +144,7 @@ class Node {
     })
   }
 
-  async requestUpdates({ storageKey } = {}) {
+  async requestUpdates({ storageKey }: { storageKey?: string } = {}) {
     try {
       for (const ip of this.nodeList) {
         if (ip === this.publicAddress) {
@@ -129,7 +155,7 @@ class Node {
           ip,
           query: `key=${ storageKey }`
         })
-        await this.receiveUpdate(body)
+        await this.receiveUpdate(body as any)
       }
     } catch (error) {
       console.error('Error updating nodes: ', error)
@@ -159,17 +185,13 @@ class Node {
     }
   }
 
-  async receiveUpdate({ data }) {
+  async receiveUpdate({ data }: { data: any[] }) {
     data = data.filter(({ createdAt }) => !!createdAt)
     await this.storage.updateInternalBatch(data)
   }
 
-  static TYPES = {
-    STORAGE: 'STORAGE',
-    CLIENT: 'CLIENT'
+  static TYPES: { [key: string]: NodeType } = {
+    STORAGE: NodeType.STORAGE,
+    CLIENT: NodeType.CLIENT
   }
-}
-
-module.exports = {
-  Node
 }
