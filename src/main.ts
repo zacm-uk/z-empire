@@ -2,6 +2,8 @@ import { resolve } from 'path'
 
 import { NodeOpts, Node } from './Node'
 
+export { StorageItem } from './storage-drivers'
+
 let opts: any = {}
 
 const configArray = process.env.EMPIRE_CONFIG && process.env.EMPIRE_CONFIG.split(' ')

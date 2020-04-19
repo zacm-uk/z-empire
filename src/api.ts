@@ -77,6 +77,20 @@ export const startApi = (node: Node, port: number) => createServer((request, res
   const params = new URLSearchParams(request.url?.replace(path, ''))
   const route = routes[`${ request.method } ${ path }`]
 
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE',
+    'Access-Control-Max-Age': 2592000
+  }
+
+  if (request.method === 'OPTIONS') {
+    response.writeHead(204, headers)
+    response.end()
+    return
+  }
+
+  Object.entries(headers).forEach(([ key, value ]) => response.setHeader(key, value))
+
   if (request.headers['node-path']) {
     const nodeIps = (request.headers['node-path'] as string).split(',')
     for (const ip of nodeIps) {

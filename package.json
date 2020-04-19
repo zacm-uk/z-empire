@@ -1,13 +1,14 @@
 {
   "typings": "build/main.d.ts",
   "name": "z-empire",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "",
   "main": "build/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node build/main.js",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "Zac McChesney",

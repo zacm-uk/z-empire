@@ -68,6 +68,17 @@ exports.startApi = (node, port) => http_1.createServer((request, response) => {
     const [path] = (_b = (_a = request.url) === null || _a === void 0 ? void 0 : _a.split('?')) !== null && _b !== void 0 ? _b : [];
     const params = new url_1.URLSearchParams((_c = request.url) === null || _c === void 0 ? void 0 : _c.replace(path, ''));
     const route = routes[`${request.method} ${path}`];
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE',
+        'Access-Control-Max-Age': 2592000
+    };
+    if (request.method === 'OPTIONS') {
+        response.writeHead(204, headers);
+        response.end();
+        return;
+    }
+    Object.entries(headers).forEach(([key, value]) => response.setHeader(key, value));
     if (request.headers['node-path']) {
         const nodeIps = request.headers['node-path'].split(',');
         for (const ip of nodeIps) {
