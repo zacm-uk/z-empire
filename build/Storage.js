@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var storage_drivers_1 = require("./storage-drivers");
+const storage_drivers_1 = require("./storage-drivers");
 function Storage(driver) {
     if (driver === 'memory') {
         return new storage_drivers_1.MemoryStorage();
