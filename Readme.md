@@ -31,6 +31,17 @@ Z-Empire allows nodes to use HTTP and the server created by a node is an HTTP se
 
 If you do not want to create a reverse proxy, use a service such as Azure that allows forcing HTTPS.
 
+## Using from the web
+```html
+<script src="https://zfilestore.blob.core.windows.net/public/z-empire-client.js"></script>
+<script>
+const client = new EmpireClient({storageDriver: 'memory', nodeList: ['https://empire.zacm.uk']})
+
+// defaultEmpireClient is an instance of EmpireClient setup using the above options
+defaultEmpireClient.getData('storageKey')
+</script>
+```
+
 ## How do I configure it?
 Configuration can be done using either a JSON file, an environment variable, or command line arguments.
 
