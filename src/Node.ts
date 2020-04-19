@@ -48,7 +48,7 @@ export class Node {
     this.hidden = hidden
 
     type === Node.TYPES.STORAGE && this.requestUpdates()
-    type === Node.TYPES.STORAGE && port && startApi(this, port)
+    type === Node.TYPES.STORAGE && startApi(this, port)
   }
 
   async getInfo() {

@@ -72,7 +72,7 @@ const routes: { [key: string]: Route } = {
   }
 }
 
-export const startApi = (node: Node, port: number) => createServer((request, response) => {
+export const startApi = (node: Node, port?: number) => createServer((request, response) => {
   const [ path ] = request.url?.split('?') ?? []
   const params = new URLSearchParams(request.url?.replace(path, ''))
   const route = routes[`${ request.method } ${ path }`]
@@ -88,7 +88,6 @@ export const startApi = (node: Node, port: number) => createServer((request, res
     response.end()
     return
   }
-
   Object.entries(headers).forEach(([ key, value ]) => response.setHeader(key, value))
 
   if (request.headers['node-path']) {

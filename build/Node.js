@@ -36,7 +36,7 @@ class Node {
         this.publicAddress = publicAddress || '';
         this.hidden = hidden;
         type === Node.TYPES.STORAGE && this.requestUpdates();
-        type === Node.TYPES.STORAGE && port && api_1.startApi(this, port);
+        type === Node.TYPES.STORAGE && api_1.startApi(this, port);
     }
     getInfo() {
         return __awaiter(this, void 0, void 0, function* () {

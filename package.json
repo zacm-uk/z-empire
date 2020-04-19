@@ -1,7 +1,7 @@
 {
   "typings": "build/main.d.ts",
   "name": "z-empire",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "",
   "main": "build/main.js",
   "scripts": {
