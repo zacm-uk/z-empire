@@ -17,7 +17,8 @@ class SqlStorage {
     constructor({ dialect, username, password, db, ssl, host, port }) {
         this._sequelize = new sequelize_1.Sequelize(dialect === 'sqlite' ? {
             dialect,
-            storage: path_1.join(os_1.homedir(), '.z-empire.db')
+            storage: path_1.join(os_1.homedir(), '.z-empire.db'),
+            logging: false
         } : {
             dialect,
             username,
@@ -26,7 +27,8 @@ class SqlStorage {
             ssl,
             host,
             port,
-            dialectOptions: { ssl }
+            dialectOptions: { ssl },
+            logging: false
         });
         this._model = class Storage extends sequelize_1.Model {
         };
