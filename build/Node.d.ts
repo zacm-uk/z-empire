@@ -28,11 +28,11 @@ export declare class Node {
         type: NodeType;
     }>;
     getData(storageKey: string): Promise<import("./storage-drivers").StorageItem>;
-    removeData(storageKey: string): Promise<void>;
-    setData(key: string, value: string): Promise<{
+    removeData(storageKey: string, awaitReplicate?: boolean): Promise<void>;
+    setData(key: string, value: string, awaitReplicate?: boolean): Promise<{
         storageKey: string;
     }>;
-    updateData(storageKey: string, value: string): Promise<{
+    updateData(storageKey: string, value: string, awaitReplicate?: boolean): Promise<{
         storageKey: string;
     }>;
     createReplicateRequest({ storageKey }?: {

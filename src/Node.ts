@@ -69,20 +69,35 @@ export class Node {
     return existing
   }
 
-  async removeData(storageKey: string) {
+  async removeData(storageKey: string, awaitReplicate?: boolean) {
     await this.storage.removeItem(storageKey)
-    this.updateNodes()
+    if (awaitReplicate) {
+      await this.updateNodes()
+    }
+    else {
+      this.updateNodes()
+    }
   }
 
-  async setData(key: string, value: string) {
+  async setData(key: string, value: string, awaitReplicate?: boolean) {
     const response = await this.storage.setItem(key, value, true)
-    this.updateNodes()
+    if (awaitReplicate) {
+      await this.updateNodes()
+    }
+    else {
+      this.updateNodes()
+    }
     return response
   }
 
-  async updateData(storageKey: string, value: string) {
+  async updateData(storageKey: string, value: string, awaitReplicate?: boolean) {
     const response = await this.storage.setItem(storageKey, value, false)
-    this.updateNodes()
+    if (awaitReplicate) {
+      await this.updateNodes()
+    }
+    else {
+      this.updateNodes()
+    }
     return response
   }
 

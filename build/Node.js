@@ -58,23 +58,38 @@ class Node {
             return existing;
         });
     }
-    removeData(storageKey) {
+    removeData(storageKey, awaitReplicate) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.storage.removeItem(storageKey);
-            this.updateNodes();
+            if (awaitReplicate) {
+                yield this.updateNodes();
+            }
+            else {
+                this.updateNodes();
+            }
         });
     }
-    setData(key, value) {
+    setData(key, value, awaitReplicate) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield this.storage.setItem(key, value, true);
-            this.updateNodes();
+            if (awaitReplicate) {
+                yield this.updateNodes();
+            }
+            else {
+                this.updateNodes();
+            }
             return response;
         });
     }
-    updateData(storageKey, value) {
+    updateData(storageKey, value, awaitReplicate) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield this.storage.setItem(storageKey, value, false);
-            this.updateNodes();
+            if (awaitReplicate) {
+                yield this.updateNodes();
+            }
+            else {
+                this.updateNodes();
+            }
             return response;
         });
     }
