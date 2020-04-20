@@ -1,13 +1,38 @@
-const momentLoaded = fetch('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js')
-  .then(res => res.text())
+const isNode = (() => {
+  try {
+    const isNode = eval('(process.release.name === "node") && (Object.prototype.toString.call(process) === "[object process]")')
+    if (isNode) {
+      return true
+    }
+  } catch {
+  }
+  return false
+})()
+
+const get = url => {
+  if (isNode) {
+    const fn = require(url.startsWith('https') ? 'https' : 'http').get
+    return new Promise((resolve, reject) => {
+      fn(url, response => {
+        let data = ''
+        response.on('data', chunk => data += chunk)
+        response.on('end', () => resolve(data))
+      })
+        .on('error', reject)
+    })
+  }
+  return fetch(url)
+    .then(res => res.text())
+}
+
+const momentLoaded = get('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js')
   .then(script => eval(script))
 
-const sha1Loaded = fetch('https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js')
-  .then(res => res.text())
+const sha1Loaded = !isNode && get('https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js')
   .then(script => eval(script))
 
-window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.OIndexedDB || window.msIndexedDB,
-  IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.OIDBTransaction || window.msIDBTransaction
+const hash = data => isNode ? require('crypto').createHash('sha1').update(data).digest('hex') : sha1(data)
+const random = isNode ? require('crypto').randomBytes(12).toString('hex') : Math.random().toString(36).substring(7)
 
 class MemoryStorage {
   constructor() {
@@ -31,9 +56,9 @@ class MemoryStorage {
 
   async setItem(storageKey, value, generateStorageKey = false) {
     if (generateStorageKey) {
-      const salt = Math.random().toString(36).substring(7)
+      const salt = random()
       await sha1Loaded
-      storageKey = sha1(`${ salt }:${ storageKey }`)
+      storageKey = hash(`${ salt }:${ storageKey }`)
     }
     const obj = this.store.find(obj => obj.storageKey === storageKey) || this.store[this.store.push({
       storageKey,
@@ -167,6 +192,19 @@ class WebClient {
       opts.path = `${ opts.path }?${ query }`
     }
 
+    if (isNode) {
+      return new Promise((resolve, reject) => {
+        const req = require(reqProto).request(opts, response => {
+          let data = ''
+          response.on('data', chunk => data += chunk)
+          response.on('end', () => resolve(/json/.test(request.headers['content-type'] || '') ? JSON.parse(data) : data))
+        })
+        req.on('error', reject)
+        body && req.write(body)
+        req.end()
+      })
+    }
+
     const response = await fetch(`${ reqProto }://${ opts.host }:${ opts.port }/${ opts.path }`, {
       method: opts.method,
       headers: opts.headers,
@@ -226,7 +264,7 @@ class WebClient {
 
 let client
 
-Object.defineProperties(window, {
+Object.defineProperties(isNode ? module.exports : window, {
   EmpireClient: {
     value: WebClient,
     enumerable: true,
