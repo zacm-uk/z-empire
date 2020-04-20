@@ -202,7 +202,7 @@ class WebClient {
         const req = require(reqProto).request(opts, response => {
           let data = ''
           response.on('data', chunk => data += chunk)
-          response.on('end', () => resolve(/json/.test(request.headers['content-type'] || '') ? JSON.parse(data) : data))
+          response.on('end', () => resolve(/json/.test(response.headers['content-type'] || '') ? JSON.parse(data) : data))
         })
         req.on('error', reject)
         body && req.write(body)
