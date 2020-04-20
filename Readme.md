@@ -33,7 +33,7 @@ If you do not want to create a reverse proxy, use a service such as Azure that a
 
 ## Using from the web
 ```html
-<script src="https://gitcdn.link/repo/zacm-uk/z-empire/master/z-empire-client.js"></script>
+<script src="https://raw.githubusercontent.com/zacm-uk/z-empire/master/z-empire-client.js"></script>
 <script>
 const client = new EmpireClient({storageDriver: 'memory', nodeList: ['https://empire.zacm.uk']})
 
