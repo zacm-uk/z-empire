@@ -25,12 +25,13 @@ const get = url => {
     .then(res => res.text())
 }
 
-let moment
 const momentLoaded = get('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js')
   .then(script => {
     const module = {exports: {}}
     eval(script)
-    moment = isNode ? module.exports : window.moment
+    if (isNode) {
+      global.moment = module.exports
+    }
   })
 
 const sha1Loaded = !isNode && get('https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js')
