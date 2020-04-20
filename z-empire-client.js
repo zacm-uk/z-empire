@@ -25,12 +25,13 @@ const get = url => {
     .then(res => res.text())
 }
 
+let moment
 const momentLoaded = get('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js')
   .then(script => {
-    const module = {exports: {}}
-    eval(script)
-    if (isNode) {
-      global.moment = module.exports
+    const module = { exports: {} }
+    moment = eval(script)
+    if (isNode && !moment && module.exports) {
+      moment = module.exports
     }
   })
 
